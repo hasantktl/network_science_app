@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Gallery from './components/Gallery';
 import SimulationHost from './components/SimulationHost';
+import SimulationHost3D from './components/SimulationHost3D';
 import { simulations } from './simulations';
 import './App.css';
 
@@ -13,6 +14,11 @@ function App() {
     <div className="app-container">
       {!currentSimId ? (
         <Gallery onSelect={setCurrentSimId} />
+      ) : activeSimulation.is3D ? (
+        <SimulationHost3D 
+          simulation={activeSimulation} 
+          onBack={() => setCurrentSimId(null)} 
+        />
       ) : (
         <SimulationHost 
           simulation={activeSimulation} 

@@ -6,6 +6,7 @@ import WattsStrogatzPanel from './watts-strogatz/CalculationPanel';
 import { generateWattsStrogatzGraph } from './watts-strogatz/logic';
 import AveragePathLengthPanel from './average-path-length/CalculationPanel';
 import { generateRandomGraph as generateAPLGraph } from './average-path-length/logic';
+import KleinbergPanel from './kleinberg-3d/CalculationPanel';
 
 export const simulations = [
   {
@@ -43,5 +44,14 @@ export const simulations = [
     CalculationPanel: AveragePathLengthPanel,
     customPanel: true, // Panel manages its own graph generation
     icon: '📏'
+  },
+  {
+    id: 'kleinberg-3d',
+    title: '3D Kleinberg Navigation',
+    description: 'Small-world navigation in 3D: Explore greedy routing with shortcuts in a 3D lattice.',
+    CalculationPanel: KleinbergPanel,
+    customPanel: true,
+    is3D: true,
+    icon: '🧊'
   }
 ];

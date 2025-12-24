@@ -286,6 +286,38 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
             </li>
           </ul>
         </div>
+
+        {/* Theory Info Note */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(59, 130, 246, 0.1))', 
+          padding: '12px', 
+          borderRadius: '8px',
+          fontSize: '0.7rem',
+          marginTop: '12px',
+          border: '1px solid rgba(99, 102, 241, 0.3)'
+        }}>
+          <div style={{ 
+            fontWeight: 'bold', 
+            marginBottom: '10px', 
+            color: 'var(--accent)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <span>💡</span> Theory Insights
+          </div>
+          <div style={{ color: 'var(--text-dim)', lineHeight: '1.5' }}>
+            <p style={{ margin: '0 0 8px 0' }}>
+              <strong style={{ color: 'var(--text)' }}>🔬 Large-Scale Validation:</strong> In huge networks (e.g., 100×100×100), random shortcuts (r=0) fail completely. Only <em>r=d</em> (optimal exponent) provides "rational" shortcuts that halve the distance to target each step.
+            </p>
+            <p style={{ margin: '0 0 8px 0' }}>
+              <strong style={{ color: 'var(--text)' }}>🎲 Small Universe Luck:</strong> In this 8×8×8 simulation, even chaotic settings (r=0) may accidentally land close to the target. This "small universe advantage" can make randomness appear faster in small networks.
+            </p>
+            <p style={{ margin: 0 }}>
+              <strong style={{ color: 'var(--text)' }}>📐 Scale & Proof:</strong> As lattice size grows from 8 to 800+, Kleinberg's mathematical proof becomes unmistakable—only properly configured (r=d) networks remain navigable at scale.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

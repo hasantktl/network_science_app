@@ -1,10 +1,20 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 
 const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, setTarget, layoutMode = 'force' }) => {
   const svgRef = useRef();
   const zoomRef = useRef();
   const gRef = useRef();
+
+  // Create a stable key for link structure (ignores highlighted property)
+  const linkStructureKey = useMemo(() => {
+    if (!links) return '';
+    return links.map(l => {
+      const s = typeof l.source === 'object' ? l.source.id : l.source;
+      const t = typeof l.target === 'object' ? l.target.id : l.target;
+      return `${s}-${t}`;
+    }).sort().join('|');
+  }, [links]);
 
   const handleZoomIn = useCallback(() => {
     if (svgRef.current && zoomRef.current) {
@@ -272,7 +282,24 @@ const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, 
     }
 
     return () => simulation.stop();
-  }, [nodes, links, selectedSource, selectedTarget, setSource, setTarget, layoutMode]);
+  }, [nodes, linkStructureKey, selectedSource, selectedTarget, setSource, setTarget, layoutMode]);
+
+  // Separate effect for updating edge highlighting without restarting simulation
+  useEffect(() => {
+    if (!svgRef.current || !links) return;
+    const svg = d3.select(svgRef.current);
+    
+    // Update data binding and then style
+    svg.selectAll(".links line")
+      .data(links, d => {
+        const s = typeof d.source === 'object' ? d.source.id : d.source;
+        const t = typeof d.target === 'object' ? d.target.id : d.target;
+        return `${s}-${t}`;
+      })
+      .attr("stroke", d => d.highlighted ? "#10b981" : "#475569")
+      .attr("stroke-opacity", d => d.highlighted ? 1 : 0.6)
+      .attr("stroke-width", d => d.highlighted ? 4 : 2);
+  }, [links]);
 
 
   const zoomButtonStyle = {

@@ -167,9 +167,9 @@ const AveragePathLengthPanel = ({
           </div>
           <input
             type="range"
-            min="0.1"
+            min="0.01"
             max="0.6"
-            step="0.05"
+            step="0.01"
             value={edgeDensity}
             onChange={(e) => setEdgeDensity(parseFloat(e.target.value))}
             style={sliderStyle}

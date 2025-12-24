@@ -146,7 +146,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
         }}
       >
         <h3 style={{ marginTop: 0, color: 'var(--accent)', marginBottom: '4px' }}>
-          Small World 3D
+          3D Kleinberg Navigation
         </h3>
         <p style={{ 
           fontSize: '0.65rem', 

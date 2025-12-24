@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -10,6 +10,10 @@ function posToVec(gridPos, offset) {
     gridPos.y * SPACING - offset,
     gridPos.z * SPACING - offset
   );
+}
+
+function posToKey(pos) {
+  return `${pos.x},${pos.y},${pos.z}`;
 }
 
 function createCircleTexture() {
@@ -43,6 +47,15 @@ const KleinbergCanvas3D = ({
   const pathLineRef = useRef(null);
   const startSphereRef = useRef(null);
   const targetSphereRef = useRef(null);
+  
+  // Node selection refs
+  const nodeSpheresRef = useRef([]);
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
+  const selectedNodeRef = useRef(null);
+  
+  // Selected node state for triggering re-renders
+  const [selectedNode, setSelectedNode] = useState(null);
 
   // Initialize Three.js scene once
   useEffect(() => {
@@ -126,7 +139,46 @@ const KleinbergCanvas3D = ({
     };
   }, []);
 
-  // Update network visualization when networkData changes
+  // Handle node click for selection toggle
+  const handleClick = useCallback((event) => {
+    if (!containerRef.current || !cameraRef.current || !networkData) return;
+    
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    
+    // Calculate normalized device coordinates
+    mouseRef.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouseRef.current.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    // Raycast
+    raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+    const intersects = raycasterRef.current.intersectObjects(nodeSpheresRef.current);
+    
+    if (intersects.length > 0) {
+      const clickedNode = intersects[0].object.userData.gridPos;
+      const clickedKey = posToKey(clickedNode);
+      
+      // Toggle selection
+      if (selectedNodeRef.current === clickedKey) {
+        selectedNodeRef.current = null;
+        setSelectedNode(null);
+      } else {
+        selectedNodeRef.current = clickedKey;
+        setSelectedNode(clickedKey);
+      }
+    }
+  }, [networkData]);
+
+  // Add click event listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    container.addEventListener('click', handleClick);
+    return () => container.removeEventListener('click', handleClick);
+  }, [handleClick]);
+
+  // Update network visualization when networkData or selectedNode changes
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene || !networkData) return;
@@ -138,14 +190,75 @@ const KleinbergCanvas3D = ({
         ref.current = null;
       }
     });
+    
+    // Clear old node spheres
+    nodeSpheresRef.current.forEach(sphere => scene.remove(sphere));
+    nodeSpheresRef.current = [];
 
     const { latticeLinks, shortcutLinks, gridSize } = networkData;
     const offset = (gridSize - 1) * SPACING / 2;
     const pointTexture = createCircleTexture();
+    
+    // Get selected node position if any
+    const selectedKey = selectedNodeRef.current;
+    let selectedPos = null;
+    if (selectedKey) {
+      const [sx, sy, sz] = selectedKey.split(',').map(Number);
+      selectedPos = { x: sx, y: sy, z: sz };
+    }
 
-    // Lattice lines (gray, low opacity)
+    // Create clickable node spheres for all grid positions
+    const nodeSphereGeo = new THREE.SphereGeometry(2, 12, 12);
+    const defaultNodeMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0x64748b, 
+      transparent: true,
+      opacity: 0.4
+    });
+    const selectedNodeMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0xfbbf24, 
+      emissive: 0xfbbf24, 
+      emissiveIntensity: 0.6 
+    });
+    
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        for (let z = 0; z < gridSize; z++) {
+          const pos = { x, y, z };
+          const key = posToKey(pos);
+          
+          // Skip start/target nodes (they have special spheres)
+          const isStart = x === 0 && y === 0 && z === 0;
+          const isTarget = x === gridSize - 1 && y === gridSize - 1 && z === gridSize - 1;
+          
+          if (!isStart && !isTarget) {
+            const isSelected = selectedKey === key;
+            const material = isSelected ? selectedNodeMaterial : defaultNodeMaterial;
+            const sphere = new THREE.Mesh(nodeSphereGeo, material.clone());
+            sphere.position.copy(posToVec(pos, offset));
+            sphere.userData.gridPos = pos;
+            scene.add(sphere);
+            nodeSpheresRef.current.push(sphere);
+          }
+        }
+      }
+    }
+
+    // Filter links based on selection
+    const filterLinks = (links) => {
+      if (!selectedPos) return links;
+      return links.filter(link => {
+        const srcKey = posToKey(link.source);
+        const tgtKey = posToKey(link.target);
+        return srcKey === selectedKey || tgtKey === selectedKey;
+      });
+    };
+
+    const filteredLatticeLinks = filterLinks(latticeLinks);
+    const filteredShortcutLinks = filterLinks(shortcutLinks);
+
+    // Lattice lines (gray, brighter if filtered)
     const latticeCoords = [];
-    for (const link of latticeLinks) {
+    for (const link of filteredLatticeLinks) {
       const v1 = posToVec(link.source, offset);
       const v2 = posToVec(link.target, offset);
       latticeCoords.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
@@ -155,24 +268,24 @@ const KleinbergCanvas3D = ({
       const latticeGeometry = new THREE.BufferGeometry();
       latticeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(latticeCoords, 3));
       const latticeMaterial = new THREE.LineBasicMaterial({ 
-        color: 0x475569, 
+        color: selectedPos ? 0x94a3b8 : 0x475569, 
         transparent: true, 
-        opacity: 0.15 
+        opacity: selectedPos ? 0.8 : 0.15 
       });
       const latticeLines = new THREE.LineSegments(latticeGeometry, latticeMaterial);
       scene.add(latticeLines);
       latticeRef.current = latticeLines;
     }
 
-    // Shortcut lines (blue)
+    // Shortcut lines (blue, brighter if filtered)
     const shortcutCoords = [];
     const activeNodes = new Set();
-    for (const link of shortcutLinks) {
+    for (const link of filteredShortcutLinks) {
       const v1 = posToVec(link.source, offset);
       const v2 = posToVec(link.target, offset);
       shortcutCoords.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
-      activeNodes.add(`${link.source.x},${link.source.y},${link.source.z}`);
-      activeNodes.add(`${link.target.x},${link.target.y},${link.target.z}`);
+      activeNodes.add(posToKey(link.source));
+      activeNodes.add(posToKey(link.target));
     }
     
     if (shortcutCoords.length > 0) {
@@ -181,7 +294,7 @@ const KleinbergCanvas3D = ({
       const shortcutMaterial = new THREE.LineBasicMaterial({ 
         color: 0x3b82f6, 
         transparent: true, 
-        opacity: 0.6 
+        opacity: selectedPos ? 1.0 : 0.6 
       });
       const shortcutLines = new THREE.LineSegments(shortcutGeometry, shortcutMaterial);
       scene.add(shortcutLines);
@@ -221,8 +334,10 @@ const KleinbergCanvas3D = ({
     });
     const startSphere = new THREE.Mesh(sphereGeo, startMaterial);
     startSphere.position.copy(posToVec({ x: 0, y: 0, z: 0 }, offset));
+    startSphere.userData.gridPos = { x: 0, y: 0, z: 0 };
     scene.add(startSphere);
     startSphereRef.current = startSphere;
+    nodeSpheresRef.current.push(startSphere);
 
     // Target sphere (red) at (gridSize-1, gridSize-1, gridSize-1)
     const targetMaterial = new THREE.MeshPhongMaterial({ 
@@ -231,18 +346,22 @@ const KleinbergCanvas3D = ({
       emissiveIntensity: 0.6 
     });
     const targetSphere = new THREE.Mesh(sphereGeo, targetMaterial);
-    targetSphere.position.copy(posToVec({ x: gridSize - 1, y: gridSize - 1, z: gridSize - 1 }, offset));
+    const targetPos = { x: gridSize - 1, y: gridSize - 1, z: gridSize - 1 };
+    targetSphere.position.copy(posToVec(targetPos, offset));
+    targetSphere.userData.gridPos = targetPos;
     scene.add(targetSphere);
     targetSphereRef.current = targetSphere;
+    nodeSpheresRef.current.push(targetSphere);
 
     console.log('3D Network rendered:', {
-      latticeLinks: latticeLinks.length,
-      shortcutLinks: shortcutLinks.length,
+      latticeLinks: filteredLatticeLinks.length,
+      shortcutLinks: filteredShortcutLinks.length,
       gridSize,
-      offset
+      offset,
+      selectedNode: selectedKey
     });
 
-  }, [networkData]);
+  }, [networkData, selectedNode]);
 
   // Update navigation path
   useEffect(() => {

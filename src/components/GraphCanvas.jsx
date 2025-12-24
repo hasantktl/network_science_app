@@ -138,7 +138,7 @@ const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, 
         const neighbors = neighborMap.get(d.id);
         
         node.style("opacity", n => (n.id === d.id || neighbors.has(n.id)) ? 1 : 0.15);
-        link.style("opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
+        link.style("opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.2);
         labels.style("opacity", n => (n.id === d.id || neighbors.has(n.id)) ? 1 : 0.15);
         neighborCounts.style("opacity", n => (n.id === d.id || neighbors.has(n.id)) ? 1 : 0.15);
       })
@@ -236,19 +236,27 @@ const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, 
 
     function drag(simulation) {
       function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
+        if (!event.active && layoutMode !== 'circular') {
+          simulation.alphaTarget(0.3).restart();
+        }
         event.subject.fx = event.subject.x;
         event.subject.fy = event.subject.y;
       }
 
       function dragged(event) {
+        event.subject.x = event.x;
+        event.subject.y = event.y;
         event.subject.fx = event.x;
         event.subject.fy = event.y;
+        // In circular mode, simulation is stopped so we need to update manually
+        if (layoutMode === 'circular') {
+          updatePositions();
+        }
       }
 
       function dragended(event) {
         if (!event.active) simulation.alphaTarget(0);
-        // In circular mode, keep nodes fixed
+        // In circular mode, keep nodes where they were dragged
         if (layoutMode !== 'circular') {
           event.subject.fx = null;
           event.subject.fy = null;

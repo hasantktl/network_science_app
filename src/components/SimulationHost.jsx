@@ -5,15 +5,21 @@ import { generateRandomGraph } from '../simulations/adamic-adar/logic'; // Stand
 
 const SimulationHost = ({ simulation, onBack }) => {
   const generator = simulation.itemGenerator || generateRandomGraph;
-  const [graphData, setGraphData] = useState(() => generator(10, 0.25));
+  const isCustomPanel = simulation.customPanel === true;
+  
+  // Custom panels manage their own graph, use empty initial state
+  const [graphData, setGraphData] = useState(() => 
+    isCustomPanel ? { nodes: [], links: [] } : generator(10, 0.25)
+  );
   const [selectedSource, setSelectedSource] = useState(null);
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [nodeCount, setNodeCount] = useState(10);
 
-  const [layoutMode, setLayoutMode] = useState('force');
+  // Default to circular layout for custom panels (like Watts-Strogatz ring topology)
+  const [layoutMode, setLayoutMode] = useState(isCustomPanel ? 'circular' : 'force');
 
   const results = useMemo(() => {
-    if (selectedSource && selectedTarget) {
+    if (selectedSource && selectedTarget && simulation.calculator) {
       if (simulation.id === 'adamic-adar-similarity') {
           const sourceNode = graphData.nodes.find(n => n.id === selectedSource);
           const targetNode = graphData.nodes.find(n => n.id === selectedTarget);
@@ -47,14 +53,16 @@ const SimulationHost = ({ simulation, onBack }) => {
              <span style={{ color: 'var(--primary)' }}>{simulation.title.split(' ').slice(1).join(' ')}</span>
           </div>
         </div>
-        <ControlPanel 
-          onRandomize={handleRandomize} 
-          onReset={handleReset} 
-          nodeCount={nodeCount}
-          setNodeCount={setNodeCount}
-          layoutMode={layoutMode}
-          setLayoutMode={setLayoutMode}
-        />
+        {!isCustomPanel && (
+          <ControlPanel 
+            onRandomize={handleRandomize} 
+            onReset={handleReset} 
+            nodeCount={nodeCount}
+            setNodeCount={setNodeCount}
+            layoutMode={layoutMode}
+            setLayoutMode={setLayoutMode}
+          />
+        )}
       </header>
 
       <main className="app-main">
@@ -76,6 +84,9 @@ const SimulationHost = ({ simulation, onBack }) => {
             target={selectedTarget} 
             results={results}
             nodes={graphData.nodes}
+            graphData={graphData}
+            setGraphData={setGraphData}
+            setLayoutMode={setLayoutMode}
           />
         </aside>
       </main>
@@ -84,3 +95,4 @@ const SimulationHost = ({ simulation, onBack }) => {
 };
 
 export default SimulationHost;
+

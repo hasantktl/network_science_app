@@ -42,7 +42,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
     resetUIStats(networkData);
     isSearchingRef.current = true;
     setStatus('running');
-    setResultMessage('Navigasyon yapılıyor...');
+    setResultMessage('Navigating...');
 
     const start = networkData.gridNodes[0][0][0];
     const target = networkData.gridNodes[GRID_SIZE - 1][GRID_SIZE - 1][GRID_SIZE - 1];
@@ -55,15 +55,15 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
       setRemainingDist(dist);
 
       if (navStatus === 'success') {
-        setResultMessage('🎯 Hedefe Ulaşıldı!');
+        setResultMessage('🎯 Target Reached!');
         setStatus('success');
         isSearchingRef.current = false;
       } else if (navStatus === 'stuck') {
-        setResultMessage('⚠️ Çıkmaz sokak!');
+        setResultMessage('⚠️ Dead End!');
         setStatus('error');
         isSearchingRef.current = false;
       } else if (navStatus === 'timeout') {
-        setResultMessage('⚠️ Yol çok uzadı.');
+        setResultMessage('⚠️ Path Too Long.');
         setStatus('error');
         isSearchingRef.current = false;
       }
@@ -146,7 +146,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
         }}
       >
         <h3 style={{ marginTop: 0, color: 'var(--accent)', marginBottom: '4px' }}>
-          Küçük Dünya 3D
+          Small World 3D
         </h3>
         <p style={{ 
           fontSize: '0.65rem', 
@@ -155,7 +155,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
           letterSpacing: '1px',
           marginBottom: '20px'
         }}>
-          Kesin Bağlantı Navigasyonu
+          Greedy Navigation Simulation
         </p>
 
         {/* R Value Slider */}
@@ -166,7 +166,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
             alignItems: 'center',
             marginBottom: '8px'
           }}>
-            <span style={{ fontSize: '0.85rem' }}>Kümelenme Üssü (r)</span>
+            <span style={{ fontSize: '0.85rem' }}>Clustering Exponent (r)</span>
             <span style={{ 
               background: 'rgba(99, 102, 241, 0.2)',
               padding: '2px 8px',
@@ -193,9 +193,9 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
             color: 'var(--text-dim)',
             marginTop: '4px'
           }}>
-            <span>0 (Geniş Ağ)</span>
+            <span>0 (Wide)</span>
             <span>3 (Optimal)</span>
-            <span>6 (Dar Ağ)</span>
+            <span>6 (Narrow)</span>
           </div>
         </div>
 
@@ -205,20 +205,20 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
             onClick={generateNetwork} 
             style={buttonStyle('primary')}
           >
-            YENİ AĞ VE BAĞLARI OLUŞTUR
+            GENERATE NEW NETWORK
           </button>
           <button 
             onClick={startNavigation} 
             style={buttonStyle('success')}
             disabled={status === 'running'}
           >
-            NAVİGASYONU BAŞLAT
+            START NAVIGATION
           </button>
           <button 
             onClick={clearPath} 
             style={buttonStyle('secondary')}
           >
-            ROTAYI TEMİZLE
+            CLEAR PATH
           </button>
         </div>
 
@@ -231,7 +231,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div style={metricCardStyle}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
-                Adım
+                Steps
               </div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {stepCount}
@@ -239,7 +239,7 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
             </div>
             <div style={metricCardStyle}>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
-                Kalan Mesafe
+                Remaining Distance
               </div>
               <div style={{ fontSize: '1.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>
                 {remainingDist}
@@ -272,17 +272,17 @@ const CalculationPanel = ({ graphData, setGraphData }) => {
           fontSize: '0.75rem'
         }}>
           <div style={{ fontWeight: 'bold', marginBottom: '8px', color: 'var(--text)' }}>
-            Bağlantı Rehberi:
+            Connection Guide:
           </div>
           <ul style={{ margin: 0, paddingLeft: '16px', color: 'var(--text-dim)' }}>
             <li style={{ marginBottom: '4px' }}>
-              <span style={{ color: '#475569' }}>―</span> <strong>Yerel Bağlar:</strong> Izgara üzerindeki yollar
+              <span style={{ color: '#475569' }}>―</span> <strong>Local Links:</strong> Grid lattice edges
             </li>
             <li style={{ marginBottom: '4px' }}>
-              <span style={{ color: '#3b82f6' }}>―</span> <strong>Kısayol Bağları:</strong> Uzun menzilli yollar
+              <span style={{ color: '#3b82f6' }}>―</span> <strong>Shortcuts:</strong> Long-range connections
             </li>
             <li>
-              <span style={{ color: '#ff3333' }}>―</span> <strong>Navigasyon:</strong> Kırmızı parlak hat
+              <span style={{ color: '#ff3333' }}>―</span> <strong>Navigation:</strong> Active path (red)
             </li>
           </ul>
         </div>

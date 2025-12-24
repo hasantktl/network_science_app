@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { InlineMath, BlockMath } from 'react-katex';
 import {
   generateRandomGraph,
   findShortestPath,
@@ -82,6 +83,26 @@ const AveragePathLengthPanel = ({
       <h3 style={{ marginTop: 0, color: 'var(--accent)', marginBottom: '16px' }}>
         Average Path Length
       </h3>
+
+      {/* Formula Info Box */}
+      <div style={{ 
+        padding: '12px', 
+        background: 'rgba(99, 102, 241, 0.1)', 
+        borderRadius: '8px', 
+        marginBottom: '20px',
+        border: '1px solid rgba(99, 102, 241, 0.2)'
+      }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>
+          Formula
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+          <BlockMath math="L = \frac{1}{n(n-1)} \sum_{i \neq j} d(i,j)" />
+        </div>
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+          where <InlineMath math="d(i,j)" /> is the shortest path between nodes <InlineMath math="i" /> and <InlineMath math="j" />, 
+          and <InlineMath math="n" /> is the number of nodes.
+        </div>
+      </div>
 
       {/* Network Parameters */}
       <div style={{ marginBottom: '20px' }}>

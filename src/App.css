@@ -1,0 +1,183 @@
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.sim-host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.app-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  min-height: 0; /* Important for flex child with overflow */
+  z-index: 10;
+}
+
+.graph-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.details-section {
+  min-height: 0;
+}
+
+/* Decoration */
+.bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: float 20s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: var(--primary);
+  top: -100px;
+  left: -100px;
+}
+
+.blob-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--secondary);
+  bottom: -100px;
+  right: -100px;
+  animation-delay: -5s;
+}
+
+@keyframes float {
+  from { transform: translate(0, 0); }
+  to { transform: translate(100px, 50px); }
+}
+
+/* Gallery Styles */
+.gallery-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  z-index: 10;
+  overflow-y: auto;
+}
+
+.gallery-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.gallery-card {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gallery-card:hover:not(.placeholder) {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.card-icon {
+  font-size: 3rem;
+}
+
+.card-content h3 {
+  margin: 0 0 10px 0;
+  color: var(--accent);
+}
+
+.card-content p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card-btn {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.gallery-card.placeholder {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.coming-soon {
+  position: absolute;
+  top: 15px;
+  right: -30px;
+  background: var(--secondary);
+  color: white;
+  padding: 4px 40px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  transform: rotate(45deg);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+}
+
+.back-btn {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  .app-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 300px;
+  }
+}

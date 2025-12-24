@@ -87,6 +87,8 @@ const SimulationHost = ({ simulation, onBack }) => {
             graphData={graphData}
             setGraphData={setGraphData}
             setLayoutMode={setLayoutMode}
+            setSource={setSelectedSource}
+            setTarget={setSelectedTarget}
           />
         </aside>
       </main>

@@ -13,7 +13,9 @@ const AveragePathLengthPanel = ({
   nodes, 
   graphData,
   setGraphData,
-  setLayoutMode 
+  setLayoutMode,
+  setSource,
+  setTarget
 }) => {
   const [nodeCount, setNodeCount] = useState(12);
   const [edgeDensity, setEdgeDensity] = useState(0.25);
@@ -27,6 +29,9 @@ const AveragePathLengthPanel = ({
   const handleGenerate = () => {
     const newGraph = generateRandomGraph(nodeCount, edgeDensity);
     setGraphData(newGraph);
+    // Clear selection when generating new graph
+    setSource?.(null);
+    setTarget?.(null);
   };
 
   // Calculate metrics when graph changes

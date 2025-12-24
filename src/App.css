@@ -91,11 +91,11 @@
 
 /* Gallery Styles */
 .gallery-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 40px 20px;
+  width: 100%;
+  padding: 40px 60px;
   z-index: 10;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .gallery-header {

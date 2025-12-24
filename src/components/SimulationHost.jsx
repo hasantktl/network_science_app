@@ -10,6 +10,8 @@ const SimulationHost = ({ simulation, onBack }) => {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [nodeCount, setNodeCount] = useState(10);
 
+  const [layoutMode, setLayoutMode] = useState('force');
+
   const results = useMemo(() => {
     if (selectedSource && selectedTarget) {
       if (simulation.id === 'adamic-adar-similarity') {
@@ -50,6 +52,8 @@ const SimulationHost = ({ simulation, onBack }) => {
           onReset={handleReset} 
           nodeCount={nodeCount}
           setNodeCount={setNodeCount}
+          layoutMode={layoutMode}
+          setLayoutMode={setLayoutMode}
         />
       </header>
 
@@ -62,6 +66,7 @@ const SimulationHost = ({ simulation, onBack }) => {
             selectedTarget={selectedTarget}
             setSource={setSelectedSource}
             setTarget={setSelectedTarget}
+            layoutMode={layoutMode}
           />
         </section>
         

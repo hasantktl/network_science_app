@@ -107,24 +107,36 @@ const CalculationPanel = ({ graphData, setGraphData, setLayoutMode }) => {
           Parameters
         </h4>
 
-        {/* Rewiring Probability Slider */}
+        {/* Rewiring Probability Slider - Logarithmic scale */}
         <div style={{ marginBottom: '20px' }}>
           <div style={labelStyle}>
             <span>Rewiring Probability (p)</span>
-            <span style={valueStyle}>{rewiringProb.toFixed(2)}</span>
+            <span style={valueStyle}>{rewiringProb < 0.001 ? rewiringProb.toExponential(1) : rewiringProb.toFixed(3)}</span>
           </div>
           <input
             type="range"
             min="0"
-            max="1"
-            step="0.01"
-            value={rewiringProb}
-            onChange={(e) => setRewiringProb(parseFloat(e.target.value))}
+            max="100"
+            step="1"
+            value={rewiringProb === 0 ? 0 : Math.log10(rewiringProb) * 25 + 100}
+            onChange={(e) => {
+              const sliderVal = parseFloat(e.target.value);
+              // Map 0-100 linear to 0.0001-1 logarithmic (with 0 = exactly 0)
+              if (sliderVal === 0) {
+                setRewiringProb(0);
+              } else {
+                const p = Math.pow(10, (sliderVal - 100) / 25);
+                setRewiringProb(Math.min(1, Math.max(0.0001, p)));
+              }
+            }}
             style={sliderStyle}
           />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>
-            <span>Regular (0)</span>
-            <span>Random (1)</span>
+            <span>0</span>
+            <span>0.001</span>
+            <span>0.01</span>
+            <span>0.1</span>
+            <span>1</span>
           </div>
         </div>
 

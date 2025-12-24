@@ -135,7 +135,7 @@ const CalculationPanel = ({ graphData, setGraphData, setLayoutMode }) => {
           <input
             type="range"
             min="6"
-            max="40"
+            max="500"
             step="1"
             value={nodeCount}
             onChange={(e) => setNodeCount(parseInt(e.target.value))}

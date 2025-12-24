@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { InlineMath, BlockMath } from 'react-katex';
 import { generateWattsStrogatzGraph, calculateMetrics } from './logic';
 
@@ -8,6 +9,7 @@ const CalculationPanel = ({ graphData, setGraphData, setLayoutMode }) => {
   const [rewiringProb, setRewiringProb] = useState(0);
   const [rewiredCount, setRewiredCount] = useState(0);
   const [totalEdges, setTotalEdges] = useState(0);
+  const [showChartModal, setShowChartModal] = useState(false);
 
   // Set circular layout on mount
   useEffect(() => {
@@ -228,8 +230,65 @@ const CalculationPanel = ({ graphData, setGraphData, setLayoutMode }) => {
         <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dim)', marginBottom: '12px', borderTop: '1px solid var(--glass-border)', paddingTop: '16px' }}>
           Phase Transition
         </h4>
-        <PhaseTransitionChart currentP={rewiringProb} />
+        <div 
+          onClick={() => setShowChartModal(true)} 
+          style={{ cursor: 'pointer' }}
+          title="Click to enlarge"
+        >
+          <PhaseTransitionChart currentP={rewiringProb} />
+        </div>
       </div>
+
+      {/* Chart Modal - rendered at body level via portal */}
+      {showChartModal && createPortal(
+        <div 
+          onClick={() => setShowChartModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--glass-bg, #1e293b)',
+              padding: '24px',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: 'var(--accent)' }}>Phase Transition</h3>
+              <button 
+                onClick={() => setShowChartModal(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <PhaseTransitionChart currentP={rewiringProb} large={true} />
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Info Section */}
       <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px', fontSize: '0.8rem' }}>
@@ -244,12 +303,15 @@ const CalculationPanel = ({ graphData, setGraphData, setLayoutMode }) => {
 };
 
 // Phase Transition Chart Component
-const PhaseTransitionChart = ({ currentP }) => {
-  const width = 280;
-  const height = 180;
-  const margin = { top: 20, right: 15, bottom: 35, left: 40 };
+const PhaseTransitionChart = ({ currentP, large = false }) => {
+  const scale = large ? 2 : 1;
+  const width = 280 * scale;
+  const height = 180 * scale;
+  const margin = { top: 20 * scale, right: 15 * scale, bottom: 35 * scale, left: 40 * scale };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
+  const fontSize = large ? 12 : 8;
+  const strokeWidth = large ? 3.5 : 2.5;
 
   // Generate theoretical curves for L/L₀ and C/C₀
   // These are approximations of the Watts-Strogatz phase transition
@@ -298,7 +360,7 @@ const PhaseTransitionChart = ({ currentP }) => {
   const smallWorldRight = logScale(0.5);
 
   return (
-    <svg width={width} height={height} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+    <svg width={width} height={height} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: large ? '12px' : '8px' }}>
       <g transform={`translate(${margin.left}, ${margin.top})`}>
         {/* Small World Region Highlight */}
         <rect 
@@ -313,7 +375,7 @@ const PhaseTransitionChart = ({ currentP }) => {
           y={innerHeight / 2} 
           textAnchor="middle" 
           fill="rgba(34, 197, 94, 0.6)" 
-          fontSize="9"
+          fontSize={fontSize * 1.1}
           transform={`rotate(-90, ${(smallWorldLeft + smallWorldRight) / 2}, ${innerHeight / 2})`}
         >
           Small World
@@ -333,10 +395,10 @@ const PhaseTransitionChart = ({ currentP }) => {
         ))}
 
         {/* L/L₀ curve (red/brown - solid) */}
-        <path d={lPath} fill="none" stroke="#c0392b" strokeWidth="2.5" />
+        <path d={lPath} fill="none" stroke="#c0392b" strokeWidth={strokeWidth} />
         
         {/* C/C₀ curve (teal - dashed) */}
-        <path d={cPath} fill="none" stroke="#0d9488" strokeWidth="2.5" strokeDasharray="6,3" />
+        <path d={cPath} fill="none" stroke="#0d9488" strokeWidth={strokeWidth} strokeDasharray={large ? "10,5" : "6,3"} />
 
         {/* Current position indicator */}
         <line 
@@ -345,10 +407,10 @@ const PhaseTransitionChart = ({ currentP }) => {
           x2={currentX} 
           y2={innerHeight} 
           stroke="#f59e0b" 
-          strokeWidth="2"
-          strokeDasharray="4,2"
+          strokeWidth={large ? 3 : 2}
+          strokeDasharray={large ? "6,3" : "4,2"}
         />
-        <circle cx={currentX} cy={5} r={4} fill="#f59e0b" />
+        <circle cx={currentX} cy={5 * scale} r={4 * scale} fill="#f59e0b" />
 
         {/* X-axis */}
         <line x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke="rgba(255,255,255,0.3)" />
@@ -358,20 +420,20 @@ const PhaseTransitionChart = ({ currentP }) => {
           <text 
             key={val}
             x={logScale(val)} 
-            y={innerHeight + 12} 
+            y={innerHeight + 12 * scale} 
             textAnchor="middle" 
             fill="rgba(255,255,255,0.6)" 
-            fontSize="8"
+            fontSize={fontSize}
           >
             {val < 0.01 ? val.toExponential(0) : val}
           </text>
         ))}
         <text 
           x={innerWidth / 2} 
-          y={innerHeight + 26} 
+          y={innerHeight + 26 * scale} 
           textAnchor="middle" 
           fill="rgba(255,255,255,0.5)" 
-          fontSize="9"
+          fontSize={fontSize * 1.1}
         >
           Rewiring Probability (p)
         </text>
@@ -383,23 +445,23 @@ const PhaseTransitionChart = ({ currentP }) => {
         {[0, 0.5, 1].map(val => (
           <text 
             key={val}
-            x={-5} 
-            y={yScale(val) + 3} 
+            x={-5 * scale} 
+            y={yScale(val) + 3 * scale} 
             textAnchor="end" 
             fill="rgba(255,255,255,0.6)" 
-            fontSize="8"
+            fontSize={fontSize}
           >
             {val}
           </text>
         ))}
 
         {/* Legend */}
-        <g transform={`translate(${innerWidth - 55}, 5)`}>
-          <line x1={0} y1={0} x2={15} y2={0} stroke="#c0392b" strokeWidth="2" />
-          <text x={18} y={3} fill="#c0392b" fontSize="8">L/L₀</text>
+        <g transform={`translate(${innerWidth - 55 * scale}, 5 * scale)`}>
+          <line x1={0} y1={0} x2={15 * scale} y2={0} stroke="#c0392b" strokeWidth={strokeWidth * 0.8} />
+          <text x={18 * scale} y={3 * scale} fill="#c0392b" fontSize={fontSize}>L/L₀</text>
           
-          <line x1={0} y1={12} x2={15} y2={12} stroke="#0d9488" strokeWidth="2" strokeDasharray="4,2" />
-          <text x={18} y={15} fill="#0d9488" fontSize="8">C/C₀</text>
+          <line x1={0} y1={12 * scale} x2={15 * scale} y2={12 * scale} stroke="#0d9488" strokeWidth={strokeWidth * 0.8} strokeDasharray="4,2" />
+          <text x={18 * scale} y={15 * scale} fill="#0d9488" fontSize={fontSize}>C/C₀</text>
         </g>
       </g>
     </svg>

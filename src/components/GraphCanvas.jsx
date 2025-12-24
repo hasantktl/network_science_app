@@ -101,12 +101,12 @@ const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, 
     // Create DOM elements FIRST
     const link = g.append("g")
       .attr("class", "links")
-      .attr("stroke", "#475569")
-      .attr("stroke-opacity", 0.6)
       .selectAll("line")
       .data(links)
       .join("line")
-      .attr("stroke-width", 2);
+      .attr("stroke", d => d.highlighted ? "#10b981" : "#475569")
+      .attr("stroke-opacity", d => d.highlighted ? 1 : 0.6)
+      .attr("stroke-width", d => d.highlighted ? 4 : 2);
 
     const nodeGroup = g.append("g").attr("class", "nodes");
     
@@ -228,7 +228,9 @@ const GraphCanvas = ({ nodes, links, selectedSource, selectedTarget, setSource, 
         .force("link", d3.forceLink(links).id(d => d.id).distance(100))
         .force("charge", d3.forceManyBody().strength(-500))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide().radius(25));
+        .force("collide", d3.forceCollide().radius(25))
+        .alphaDecay(0.05)    // Faster decay (default 0.0228) - settles ~2x faster
+        .velocityDecay(0.4); // More damping to reduce oscillation
 
       simulation.on("tick", updatePositions);
       simulation.alpha(1).restart();

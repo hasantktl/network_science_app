@@ -47,6 +47,33 @@ const AveragePathLengthPanel = ({
     return null;
   }, [source, target, graphData]);
 
+  // Highlight path edges in graph when path is found
+  useEffect(() => {
+    if (selectedPath?.path?.length > 1 && graphData?.links) {
+      const pathEdges = [];
+      for (let i = 0; i < selectedPath.path.length - 1; i++) {
+        pathEdges.push({
+          source: selectedPath.path[i],
+          target: selectedPath.path[i + 1]
+        });
+      }
+      
+      const updatedLinks = graphData.links.map(link => {
+        const linkSource = typeof link.source === 'object' ? link.source.id : link.source;
+        const linkTarget = typeof link.target === 'object' ? link.target.id : link.target;
+        
+        const isOnPath = pathEdges.some(pe => 
+          (pe.source === linkSource && pe.target === linkTarget) ||
+          (pe.source === linkTarget && pe.target === linkSource)
+        );
+        
+        return { ...link, highlighted: isOnPath };
+      });
+      
+      setGraphData({ ...graphData, links: updatedLinks });
+    }
+  }, [selectedPath]);
+
   const sliderStyle = {
     width: '100%',
     height: '6px',

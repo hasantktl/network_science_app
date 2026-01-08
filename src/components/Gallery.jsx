@@ -6,7 +6,7 @@ const Gallery = ({ onSelect }) => {
     <div className="gallery-container">
       <div className="gallery-header">
         <h1><span style={{ color: 'var(--accent)' }}>NApps</span></h1>
-        <p>Explainer Apps for Concepts, Metrics, and Models of Network Analysis</p>
+        <p>Explainer Apps for Network Analysis Concepts, Metrics, and Models</p>
       </div>
       
       <div className="gallery-grid">

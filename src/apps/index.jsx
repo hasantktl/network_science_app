@@ -15,7 +15,7 @@ export const categories = [
   { id: 'graph-metrics', label: 'Graph Metrics', icon: '📊' }
 ];
 
-export const simulations = [
+export const apps = [
   {
     id: 'adamic-adar-index',
     title: 'Adamic-Adar Index',

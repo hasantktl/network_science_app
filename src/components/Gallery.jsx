@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { simulations, categories } from '../simulations';
+import { apps, categories } from '../apps';
 
 const Gallery = ({ onSelect }) => {
   const [activeCategory, setActiveCategory] = useState('all');
 
-  const filteredSimulations = activeCategory === 'all'
-    ? simulations
-    : simulations.filter(sim => sim.category === activeCategory);
+  const filteredApps = activeCategory === 'all'
+    ? apps
+    : apps.filter(app => app.category === activeCategory);
 
   return (
     <div className="gallery-container">
@@ -29,19 +29,19 @@ const Gallery = ({ onSelect }) => {
       </div>
       
       <div className="gallery-grid">
-        {filteredSimulations.map(sim => (
+        {filteredApps.map(app => (
           <div 
-            key={sim.id} 
-            className={`gallery-card glass-panel ${sim.placeholder ? 'placeholder' : ''}`}
-            onClick={() => !sim.placeholder && onSelect(sim.id)}
+            key={app.id} 
+            className={`gallery-card glass-panel ${app.placeholder ? 'placeholder' : ''}`}
+            onClick={() => !app.placeholder && onSelect(app.id)}
           >
-            <div className="card-icon">{sim.icon}</div>
+            <div className="card-icon">{app.icon}</div>
             <div className="card-content">
-              <h3>{sim.title}</h3>
-              <p>{sim.description}</p>
+              <h3>{app.title}</h3>
+              <p>{app.description}</p>
             </div>
-            {!sim.placeholder && <button className="btn card-btn">Explore Simulation</button>}
-            {sim.placeholder && <span className="coming-soon">Upcoming</span>}
+            {!app.placeholder && <button className="btn card-btn">Explore App</button>}
+            {app.placeholder && <span className="coming-soon">Upcoming</span>}
           </div>
         ))}
       </div>

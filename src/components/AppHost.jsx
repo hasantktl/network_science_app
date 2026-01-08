@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import GraphCanvas from './GraphCanvas';
 import ControlPanel from './ControlPanel';
-import { generateRandomGraph } from '../simulations/adamic-adar/logic'; // Standard generator
+import { generateRandomGraph } from '../apps/adamic-adar/logic'; // Standard generator
 
-const SimulationHost = ({ simulation, onBack }) => {
-  const generator = simulation.itemGenerator || generateRandomGraph;
-  const isCustomPanel = simulation.customPanel === true;
+const AppHost = ({ app, onBack }) => {
+  const generator = app.itemGenerator || generateRandomGraph;
+  const isCustomPanel = app.customPanel === true;
   
   // Custom panels manage their own graph, use empty initial state
   const [graphData, setGraphData] = useState(() => 
@@ -19,16 +19,16 @@ const SimulationHost = ({ simulation, onBack }) => {
   const [layoutMode, setLayoutMode] = useState(isCustomPanel ? 'circular' : 'force');
 
   const results = useMemo(() => {
-    if (selectedSource && selectedTarget && simulation.calculator) {
-      if (simulation.id === 'adamic-adar-similarity') {
+    if (selectedSource && selectedTarget && app.calculator) {
+      if (app.id === 'adamic-adar-similarity') {
           const sourceNode = graphData.nodes.find(n => n.id === selectedSource);
           const targetNode = graphData.nodes.find(n => n.id === selectedTarget);
-          return simulation.calculator(sourceNode, targetNode, graphData.nodes);
+          return app.calculator(sourceNode, targetNode, graphData.nodes);
       }
-      return simulation.calculator(graphData.nodes, graphData.links, selectedSource, selectedTarget);
+      return app.calculator(graphData.nodes, graphData.links, selectedSource, selectedTarget);
     }
     return { score: 0, neighbors: [], sharedAttributes: [] };
-  }, [graphData, selectedSource, selectedTarget, simulation]);
+  }, [graphData, selectedSource, selectedTarget, app]);
 
   const handleRandomize = () => {
     setGraphData(generator(nodeCount, 0.25));
@@ -41,7 +41,7 @@ const SimulationHost = ({ simulation, onBack }) => {
     setSelectedTarget(null);
   };
 
-  const CalcPanel = simulation.ActualPanel || simulation.CalculationPanel;
+  const CalcPanel = app.ActualPanel || app.CalculationPanel;
 
   return (
     <div className="sim-host">
@@ -49,8 +49,8 @@ const SimulationHost = ({ simulation, onBack }) => {
         <div className="logo-section">
           <button className="btn btn-outline back-btn" onClick={onBack}>← Gallery</button>
           <div className="logo" style={{ marginLeft: '16px' }}>
-             <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{simulation.title.split(' ')[0]}</span>
-             <span style={{ color: 'var(--primary)' }}>{simulation.title.split(' ').slice(1).join(' ')}</span>
+             <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>{app.title.split(' ')[0]}</span>
+             <span style={{ color: 'var(--primary)' }}>{app.title.split(' ').slice(1).join(' ')}</span>
           </div>
         </div>
         {!isCustomPanel && (
@@ -96,5 +96,4 @@ const SimulationHost = ({ simulation, onBack }) => {
   );
 };
 
-export default SimulationHost;
-
+export default AppHost;

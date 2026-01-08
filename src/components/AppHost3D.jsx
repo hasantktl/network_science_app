@@ -1,7 +1,7 @@
 import React from 'react';
 
-const SimulationHost3D = ({ simulation, onBack }) => {
-  const CalcPanel = simulation.ActualPanel || simulation.CalculationPanel;
+const AppHost3D = ({ app, onBack }) => {
+  const CalcPanel = app.ActualPanel || app.CalculationPanel;
 
   return (
     <div className="sim-host">
@@ -10,10 +10,10 @@ const SimulationHost3D = ({ simulation, onBack }) => {
           <button className="btn btn-outline back-btn" onClick={onBack}>← Gallery</button>
           <div className="logo" style={{ marginLeft: '16px' }}>
             <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>
-              {simulation.title.split(' ')[0]}
+              {app.title.split(' ')[0]}
             </span>
             <span style={{ color: 'var(--primary)' }}>
-              {simulation.title.split(' ').slice(1).join(' ')}
+              {app.title.split(' ').slice(1).join(' ')}
             </span>
           </div>
         </div>
@@ -38,4 +38,4 @@ const SimulationHost3D = ({ simulation, onBack }) => {
   );
 };
 
-export default SimulationHost3D;
+export default AppHost3D;

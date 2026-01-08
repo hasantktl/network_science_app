@@ -1,28 +1,28 @@
 import React, { useState } from 'react';
 import Gallery from './components/Gallery';
-import SimulationHost from './components/SimulationHost';
-import SimulationHost3D from './components/SimulationHost3D';
-import { simulations } from './simulations';
+import AppHost from './components/AppHost';
+import AppHost3D from './components/AppHost3D';
+import { apps } from './apps';
 import './App.css';
 
 function App() {
-  const [currentSimId, setCurrentSimId] = useState(null);
+  const [currentAppId, setCurrentAppId] = useState(null);
 
-  const activeSimulation = simulations.find(s => s.id === currentSimId);
+  const activeApp = apps.find(a => a.id === currentAppId);
 
   return (
     <div className="app-container">
-      {!currentSimId ? (
-        <Gallery onSelect={setCurrentSimId} />
-      ) : activeSimulation.is3D ? (
-        <SimulationHost3D 
-          simulation={activeSimulation} 
-          onBack={() => setCurrentSimId(null)} 
+      {!currentAppId ? (
+        <Gallery onSelect={setCurrentAppId} />
+      ) : activeApp.is3D ? (
+        <AppHost3D 
+          app={activeApp} 
+          onBack={() => setCurrentAppId(null)} 
         />
       ) : (
-        <SimulationHost 
-          simulation={activeSimulation} 
-          onBack={() => setCurrentSimId(null)} 
+        <AppHost 
+          app={activeApp} 
+          onBack={() => setCurrentAppId(null)} 
         />
       )}
 

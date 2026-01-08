@@ -11,8 +11,8 @@ const Gallery = ({ onSelect }) => {
   return (
     <div className="gallery-container">
       <div className="gallery-header">
-        <h1>Network Analysis <span style={{ color: 'var(--accent)' }}>Simulation Gallery</span></h1>
-        <p>Explore different algorithms for network structure and link prediction.</p>
+        <h1><span style={{ color: 'var(--accent)' }}>NApps</span></h1>
+        <p>Explainer Apps for Concepts, Metrics, and Models of Network Analysis</p>
       </div>
 
       <div className="category-filters">
